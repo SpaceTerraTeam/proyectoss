@@ -115,6 +115,7 @@ public function post_modifyUser(){
         $tokenDecode = JWT::decode($jwt, $this->key , array('HS256'));
         $id = $tokenDecode->data->id;
         $input = $_POST;
+        
         $username = $input['username'];
         $password = $input['password'];
         $email = $input['email'];
@@ -269,6 +270,52 @@ public function get_validateUsername(){
     }catch(Exception $e) {
         $this->Mensaje('500', 'Error de servidor', "aprender a programar");
     }
+}
+
+public function post_modifyUserAdmin(){
+
+    $jwt = apache_request_headers()['Authorization'];
+
+    try{
+
+        if(!empty($jwt)){
+
+            $tokenDecode = JWT::decode($jwt, $this->key , array('HS256'));
+            
+            $username = $tokenDecode->data->username;
+            $password = $tokenDecode->data->password;
+
+            $id = $_POST["id"];
+
+            $input = $_POST;
+
+            $BDuser = Model_Usuarios::find('first', array(
+            'where' => array(
+                array('username', $username),
+                array('password', $password)
+                ),
+            ));
+            $BDuser2 = Model_Usuarios::find('first', array(
+            'where' => array(
+                array('id', $id)
+                ),
+            ));
+
+            if($BDuser != null){
+                if ($BDuser2 != null) {
+                   
+                    $BDuser2->username = $input['username'];
+                    $BDuser2->password = $input['password'];
+                    $BDuser2->save();
+                    $this->Mensaje('200', 'usuario modificado', $id);
+                } 
+            }
+        }else {
+            $this->Mensaje('400', 'usuario invalido', $id);
+        }
+    }catch(Exception $e){
+        $this->Mensaje('500', 'Error de verificacion', "aprender a programar");
+    } 
 }
 
 function Mensaje($code, $message, $data){
