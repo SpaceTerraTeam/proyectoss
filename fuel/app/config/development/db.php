@@ -3,7 +3,7 @@
  * The development database settings. These get merged with the global settings.
  */
 
-return array(
+/*return array(
 	'default' => array(
 		'connection'  => array(
 			'dsn'        => 'mysql:host=localhost;dbname=sanwichino',
@@ -11,8 +11,8 @@ return array(
 			'password'   => 'x1RyxUyhzeUMveTO',
 		),
 	),
-);
-/* return array(
+);*/
+return array(
 	'default' => array(
  		'connection'  => array(
  			'dsn'        => 'mysql:host=localhost;dbname=spaceTerra',
@@ -20,4 +20,4 @@ return array(
  			'password'   => 'cev',
 		),
  	),
-);*/
+);
