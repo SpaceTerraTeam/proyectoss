@@ -1,6 +1,6 @@
 <?php
 use Firebase\JWT\JWT;
-class Controller_esquema extends Controller_Rest
+class Controller_esquema extends Controller_Base
 {
     private $key = 'my_secret_key';
     protected $format = 'json';
@@ -12,8 +12,10 @@ class Controller_esquema extends Controller_Rest
             $id = $tokenDecode->data->id;
 
             $input = $_POST;
+            $image = $_FILES['image'];
             $name = $input['name'];
-            $photo = $input['photo'];
+            $editable = $input['editable'];
+            $ranking = $input['ranking'];
 
             $BDuser = Model_Usuarios::find('first', array(
                 'where' => array(
@@ -22,33 +24,28 @@ class Controller_esquema extends Controller_Rest
             ));
 
             $BDscheme = Model_Esquemas::find('first', array(
-                    'where' => array(
-                        array('name', $name),
-                        'or' => array(
-                        array('photo', $photo))
-                        ),
-                    ));
+                'where' => array(
+                    array('name', $name)),
+            ));
 
             if($BDuser != null){
                 if (array_key_exists('name', $input) && !empty($name)){
-                    if (array_key_exists('photo', $input) && !empty($photo)) {
-                        if(count($BDscheme < 1)){
+                    if (array_key_exists('image', $_FILES) && !empty($image)){
+                        if($BDscheme == null){
             
                             $new = new Model_Esquemas();
                             $new->name = $name;
-                            $new->photo = $photo;
+                            $new->editable = $editable;
+                            $new->ranking = $ranking;
+                            $this->Upload($new, $image);
                             $new->save();
-
-                            $this->Mensaje('200', 'esquemaCreado');
+                            
+                            $this->Mensaje('200', 'Esquema Creado', $name);
                         }else{
-                            if ($BDscheme->name == $name) {
-                                $this->Mensaje('400', 'Ya hay un esquema con ese nombre', $name);
-                            }elseif ($BDscheme->photo == $photo) {
-                                $this->Mensaje('400', 'Ya hay un esquema con esa foto', $photo);
-                            }
+                            $this->Mensaje('400', 'Ya hay un esquema con ese nombre', $name);
                         }
                     }else{
-                        $this->Mensaje('400', 'Campo foto obligatorio', $photo);
+                        $this->Mensaje('400', 'Campo imagen obligatorio', $image);
                     }
                 }else{
                     $this->Mensaje('400', 'Campo nombre obligatorio', $name);
@@ -56,7 +53,8 @@ class Controller_esquema extends Controller_Rest
             }else{
                 $this->Mensaje('400', 'Permisos Denegados', $input);
             }
-        }catch{
+        }catch(Exception $e){
+            echo $e;
             $this->Mensaje('500', 'Error Interno del servidor', "Aprende a programar");
         }  
     }
@@ -78,18 +76,22 @@ class Controller_esquema extends Controller_Rest
 
                 $BDscheme = Model_Esquemas::find('first', array(
                 'where' => array(
-                    array('id', $idesquema)
+                    array('id', $idEsquema)
                     ),
                 ));
 
-                $BDscheme->delete();
-
-                $this->Mensaje('200', 'Esquema borrado', $BDplanet);
+                if ($BDscheme != null) {
+                    $BDscheme->delete();
+                    $this->Mensaje('200', 'Esquema borrado', $BDscheme);
+                }else{
+                    $this->Mensaje('400', 'Este esquema no existe', $BDscheme);
+                }
             } else {
                 $this->Mensaje('400', 'Permisos Denegados', $input);
             }
             
         }catch(Exception $e) {
+            echo $e;
             $this->Mensaje('500', 'Error de verificacion', "aprender a programar");
         } 
     }
@@ -101,8 +103,8 @@ class Controller_esquema extends Controller_Rest
             $id = $tokenDecode->data->id;
 
             $input = $_POST;
+            $image = $_FILES['image'];
             $name = $input['name'];
-            $photo = $input['photo'];
            
             $BDuser = Model_Usuarios::find('first', array(
                 'where' => array(
@@ -112,26 +114,34 @@ class Controller_esquema extends Controller_Rest
 
             $idEsquema = $_POST["id"];
 
-                $BDscheme = Model_Esquemas::find('first', array(
+            $BDscheme = Model_Esquemas::find('first', array(
+            'where' => array(
+                array('id', $idEsquema)
+                ),
+            ));
+
+            $BDscheme2 = Model_Esquemas::find('first', array(
                 'where' => array(
-                    array('id', $idEsquema)
-                    ),
-                ));
+                    array('name', $name)),
+            ));
 
             if($BDuser != null){
                 
-                if (array_key_exists('name', $input)&& !empty($name) && array_key_exists('photo', $input) && !empty($photo){
-
-                    if (!empty($name)) {
-                        $BDscheme->name = $name;
-                        $BDscheme->save();
-                    }
-                    if (!empty($photo)) {
-                        $BDscheme->photo = $photo;
-                        $BDscheme->save();
-                    }
+                if (array_key_exists('name', $input) && !empty($name) || array_key_exists('image', $_FILES) && !empty($image)){
+                    if(count($BDscheme2) < 1){
+                        if (!empty($name)) {
+                            $BDscheme->name = $name;
+                            $BDscheme->save();
+                        }
+                        if (!empty($image)) {
+                            $this->Upload($BDscheme, $image);
+                            $BDscheme->save();
+                        }
                     
-                    $this->Mensaje('200', 'Esquema modificado', $BDscheme);
+                        $this->Mensaje('200', 'Esquema modificado', $BDscheme);
+                    }else{
+                        $this->Mensaje('400', 'Ya hay un esquema con ese nombre', $name);
+                    }
                 
                 }else{
                     $this->Mensaje('400', 'Introduce algun parametro', $input);
@@ -139,7 +149,8 @@ class Controller_esquema extends Controller_Rest
             }else {
                 $this->Mensaje('400', 'Permisos Denegados', $id);
             }
-        }catch{
+        }catch(Exception $e){
+            echo $e;
             $this->Mensaje('500', 'Error interno del servidor', "Aprende a programar");
         }
     }
@@ -162,17 +173,8 @@ class Controller_esquema extends Controller_Rest
             }else {
                 $this->Mensaje('400', 'Permisos Denegados', $id);
             }
-        }catch{
+        }catch(Exception $e){
             $this->Mensaje('500', 'Error interno del servidor', "Aprende a programar");
         }
-    }
-
-    function Mensaje($code, $message, $data){
-        $json = $this->response(array(
-            'code' => $code,
-            'message' => $message,
-            'data' => $data
-            ));
-        return $json;
     }
 }

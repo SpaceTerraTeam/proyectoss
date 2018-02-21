@@ -1,6 +1,6 @@
 <?php
 use Firebase\JWT\JWT;
-class Controller_usuario extends Controller_Rest
+class Controller_usuario extends Controller_Base
 {
     private $key = 'my_secret_key';
     protected $format = 'json';
@@ -316,14 +316,6 @@ public function post_modifyUserAdmin(){
     }catch(Exception $e){
         $this->Mensaje('500', 'Error de verificacion', "aprender a programar");
     } 
-}
+}s
 
-function Mensaje($code, $message, $data){
-    $json = $this->response(array(
-        'code' => $code,
-        'message' => $message,
-        'data' => $data
-        ));
-    return $json;
-}
 }

@@ -1,6 +1,6 @@
 <?php
 use Firebase\JWT\JWT;
-class Controller_planeta extends Controller_Rest
+class Controller_planeta extends Controller_Base
 {
     private $key = 'my_secret_key';
     protected $format = 'json';
@@ -13,12 +13,12 @@ class Controller_planeta extends Controller_Rest
             $id = $tokenDecode->data->id;
 
             $input = $_POST;
+            $image = $_FILES['image'];
             $name = $input['name'];
             $description = $input['description'];
             $model = $input['model'];
             $size = $input['size'];
             $speed = $input['speed'];
-            $picture = $input['picture'];
 
             $BDuser = Model_Usuarios::find('first', array(
                 'where' => array(
@@ -32,9 +32,7 @@ class Controller_planeta extends Controller_Rest
                         'or' => array(
                         array('description', $description)),
                         'or' => array(
-                        array('model', $model)),
-                        'or' => array(
-                        array('picture', $picture))                        
+                        array('model', $model)),                       
                     ),
                 ));
 
@@ -45,7 +43,7 @@ class Controller_planeta extends Controller_Rest
                         if (array_key_exists('model', $input) && !empty($model)) {
                             if (array_key_exists('size', $input) && !empty($size)) {
                                 if (array_key_exists('speed', $input) && !empty($speed)) {
-                                    if (array_key_exists('picture', $input) && !empty($picture)) {
+                                    if (array_key_exists('image', $_FILES) && !empty($image)) {
                                         if($BDplanet == null){
                             
                                             $new = new Model_Planetas();
@@ -54,7 +52,7 @@ class Controller_planeta extends Controller_Rest
                                             $new->model = $model;
                                             $new->size = $size;
                                             $new->speed = $speed;
-                                            $new->picture = $picture;
+                                            $this->Upload($new, $image);
                                             $new->save();
 
 
@@ -66,12 +64,10 @@ class Controller_planeta extends Controller_Rest
                                                 $this->Mensaje('400', 'Ya hay un planeta con esa descripcion', $input);
                                             }elseif ($BDplanet->model == $model) {
                                                 $this->Mensaje('400', 'Ya hay un planeta con ese modelo', $input);
-                                            }elseif ($BDplanet->picture == $picture) {
-                                                $this->Mensaje('400', 'Ya hay un planeta con esa imagen', $input);
                                             }
                                         }
                                     }else{
-                                        $this->Mensaje('400', 'Campo imagen obligatorio', $input);
+                                        $this->Mensaje('400', 'Campo imagen obligatorio', $image);
                                     }
                                 }else{
                                     $this->Mensaje('400', 'Campo velocidad obligatorio', $input);
@@ -140,12 +136,12 @@ class Controller_planeta extends Controller_Rest
             $id = $tokenDecode->data->id;
 
             $input = $_POST;
+            $image = $_FILES['image'];
             $name = $input['name'];
             $description = $input['description'];
             $model = $input['model'];
             $size = $input['size'];
             $speed = $input['speed'];
-            $picture = $input['picture'];
            
             $BDuser = Model_Usuarios::find('first', array(
                 'where' => array(
@@ -155,11 +151,11 @@ class Controller_planeta extends Controller_Rest
 
             $idPlaneta = $_POST["id"];
 
-                $BDplanet = Model_Planetas::find('first', array(
-                'where' => array(
-                    array('id', $idPlaneta)
-                    ),
-                ));
+            $BDplanet = Model_Planetas::find('first', array(
+            'where' => array(
+                array('id', $idPlaneta)
+                ),
+            ));
 
             $BDplanet2 = Model_Planetas::find('first', array(
                 'where' => array(
@@ -167,14 +163,12 @@ class Controller_planeta extends Controller_Rest
                     'or' => array(
                     array('description', $description)),
                     'or' => array(
-                    array('model', $model)),
-                    'or' => array(
-                    array('picture', $picture))                        
+                    array('model', $model)),                       
                     ),
                 ));
 
             if($BDuser != null){
-                if (array_key_exists('name', $input) && !empty($name) || array_key_exists('description', $input) && !empty($description) || array_key_exists('model', $input) && !empty($model) || !empty($size) &&  array_key_exists('size', $input) || array_key_exists('speed', $input) && !empty($speed) || array_key_exists('picture', $input) &&  !empty($picture)){
+                if (array_key_exists('name', $input) && !empty($name) || array_key_exists('description', $input) && !empty($description) || array_key_exists('model', $input) && !empty($model) || !empty($size) &&  array_key_exists('size', $input) || array_key_exists('speed', $input) && !empty($speed) || array_key_exists('image', $_FILES) &&  !empty($image)){
                     if(count($BDplanet2) < 1){
 
                         if (!empty($name)) {
@@ -197,21 +191,21 @@ class Controller_planeta extends Controller_Rest
                             $BDplanet->speed = $speed;
                             $BDplanet->save();
                         }
-                        if (!empty($picture)) {
-                            $BDplanet->picture = $picture;
+                        if (!empty($image)) {
+                            $this->Upload($BDplanet, $image);
                             $BDplanet->save();
                         }
                         
                         $this->Mensaje('200', 'Planeta modificado', $BDplanet);
                     }else{
                         if ($BDplanet2->name == $name) {
-                            $this->Mensaje('400', 'Ya hay un planeta con ese nombre', $name);
+                            $menssage = self::Mensaje('400', 'Ya hay un planeta con ese nombre', $name);
                         }elseif ($BDplanet2->description == $description) {
-                            $this->Mensaje('400', 'Ya hay un planeta con esa descripcion', $descripcion);
+                            $menssage = self::Mensaje('400', 'Ya hay un planeta con esa descripcion', $descripcion);
                         }elseif ($BDplanet2->model == $model) {
-                            $this->Mensaje('400', 'Ya hay un planeta con ese modelo', $model);
+                            $menssage = self::Mensaje('400', 'Ya hay un planeta con ese modelo', $model);
                         }elseif ($BDplanet2->picture == $picture) {
-                            $this->Mensaje('400', 'Ya hay un planeta con esa imagen', $picture);
+                            $menssage = self::Mensaje('400', 'Ya hay un planeta con esa imagen', $image);
                         }
                     }
                 
@@ -241,21 +235,13 @@ class Controller_planeta extends Controller_Rest
 
             if ($BDuser != null){
                 $planets = Model_Planetas::find('all');
-                $this->Mensaje('200', 'lista de planetas', $planets);
+                $menssage = self::Mensaje('200', 'lista de planetas', $planets);
             }else {
-                $this->Mensaje('400', 'Permisos Denegados', $id);
+                $menssage = self::Mensaje('400', 'Permisos Denegados', $id);
             }
         }catch(Exception $e){
             $this->Mensaje('500', 'Error interno del servidor', "Aprende a programar");
         }
     }
 
-    function Mensaje($code, $message, $data){
-        $json = $this->response(array(
-            'code' => $code,
-            'message' => $message,
-            'data' => $data
-            ));
-        return $json;
-    }
 }
