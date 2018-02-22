@@ -316,6 +316,6 @@ public function post_modifyUserAdmin(){
     }catch(Exception $e){
         $this->Mensaje('500', 'Error de verificacion', "aprender a programar");
     } 
-}s
+}
 
 }

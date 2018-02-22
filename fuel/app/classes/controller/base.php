@@ -20,7 +20,8 @@ class Controller_Base extends Controller_Rest
             Upload::save();
             foreach(Upload::get_files() as $file)
             {
-                $object->picture = 'http://h2744356.stratoserver.net/sanwichino/proyectoss/public/assets/img' . $file['saved_as'] ;
+                var_dump($file);
+                $object->picture = 'http://h2744356.stratoserver.net/sanwichino/proyectoss/public/assets/img/' . $file['saved_as'];
                 
             }
         }
