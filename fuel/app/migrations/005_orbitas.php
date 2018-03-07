@@ -9,7 +9,6 @@ class orbitas
         \DBUtil::create_table('orbitas', array(
                 'id' => array('type' => 'int', 'constraint' => 11, 'auto_increment' => true),
                 'radius' => array('type' => 'float', 'constraint' => 25),
-                'name' => array('type' => 'varchar', 'constraint' => 100, 'null' => false),
             ), array('id'), false, 'InnoDB', 'utf8_unicode_ci'
         );
     }

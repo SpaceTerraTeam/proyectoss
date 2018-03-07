@@ -10,7 +10,7 @@ class planetas
                 'id' => array('type' => 'int', 'constraint' => 11, 'auto_increment' => true),
                 'name' => array('type' => 'varchar', 'constraint' => 100, 'null' => false),
                 'description' => array('type' => 'varchar', 'constraint' => 100),
-                'model' => array('type' => 'varchar', 'constraint' => 25),
+                'model' => array('type' => 'varchar', 'constraint' => 250),
                 'speed' => array('type' => 'float', 'constraint' => 25),
                 'size' => array('type' => 'float', 'constraint' => 25),
                 'picture' => array('type' => 'varchar', 'constraint' => 250, 'null' => false),

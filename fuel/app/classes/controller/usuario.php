@@ -9,13 +9,15 @@ class Controller_usuario extends Controller_Base
     {
         $input = $_POST;
         if (array_key_exists('username', $input)&& !empty($input['username']) && array_key_exists('email', $input) && !empty($input['email']) && array_key_exists('passwordRepeat', $input) && !empty($input['passwordRepeat']) && !empty($input['password']) && array_key_exists('password', $input) && array_key_exists('rol', $input)){
+
             $BDuser = Model_Usuarios::find('first', array(
                 'where' => array(
                     array('username', $input['username'])
-                    ),
-                ));
+                ),
+            ));
+
             if ($input['password'] == $input['passwordRepeat']){
-                if(count($BDuser) < 1){
+                if($BDuser == null){
                     $new = new Model_Usuarios();
                     $new->username = $input['username'];
                     $new->email = $input['email'];

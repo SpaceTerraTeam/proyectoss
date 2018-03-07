@@ -3,7 +3,7 @@
 class Model_Orbitas extends Orm\Model
 {
 	protected static $_table_name = 'orbitas';
-    protected static $_properties = array('id', 'radius','name');
+    protected static $_properties = array('id', 'radius');
     protected static $_primary_key = array('id');
     protected static $_many_many = array(
     'estrellas' => array(

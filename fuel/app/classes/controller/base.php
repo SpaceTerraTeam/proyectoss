@@ -2,7 +2,10 @@
 use Firebase\JWT\JWT;
 class Controller_Base extends Controller_Rest
 {
-    public function Upload($object, $image)
+    private $key = 'my_secret_key';
+    protected $format = 'json';
+
+    public function Upload($object)
     {
         
         // Custom configuration for this upload
@@ -18,11 +21,16 @@ class Controller_Base extends Controller_Rest
         {
             // save them according to the config
             Upload::save();
-            foreach(Upload::get_files() as $file)
+            $value = Upload::get_files();
+            foreach($value as $file)
             {
-                var_dump($file);
-                $object->picture = 'http://h2744356.stratoserver.net/sanwichino/proyectoss/public/assets/img/' . $file['saved_as'];
-                
+                if($file['field'] == 'model'){
+                    //var_dump($value[0]['field']);
+                    
+                    $object->model = 'http://h2744356.stratoserver.net/sanwichino/proyectoss/public/assets/img/' . $file['saved_as']; 
+                }else{
+                    $object->picture = 'http://h2744356.stratoserver.net/sanwichino/proyectoss/public/assets/img/' . $file['saved_as'];
+                }
             }
         }
         // and process any errors
@@ -33,7 +41,25 @@ class Controller_Base extends Controller_Rest
         $this->Mensaje('200', 'Imagen subida con exito', $file);
     }
 
-    function Mensaje($code, $message, $data){
+    function validateToken($jwt){
+        $tokenDecode = JWT::decode($jwt, $this->key, array('HS256'));
+
+        $id = $tokenDecode->data->id;
+
+        $DBuser = Model_Usuarios::find('first', array(
+        'where' => array(
+              array('id', $id),
+            )
+        ));
+
+        if($DBuser != null){
+            return $id;
+        }else{
+            return null;
+        }
+    }
+
+    public function Mensaje($code, $message, $data){
         $json = $this->response(array(
             'code' => $code,
             'message' => $message,
